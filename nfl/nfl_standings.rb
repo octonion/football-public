@@ -26,7 +26,7 @@ team_standings_url = "http://www.nfl.com/standings?category=div"
 
 team_standings_xpath = '//*[@class="data-table1"]/tbody/tr'
 
-(2001..2013).each do |year|
+(1920..2013).each do |year|
 
   sleep_time = base_sleep
   url = team_standings_url+"&season=#{year}-REG&split=Overall"
@@ -60,7 +60,7 @@ team_standings_xpath = '//*[@class="data-table1"]/tbody/tr'
       text = field.text.strip rescue nil
       case j
       when 0
-        parts = text.split("-")
+        parts = text.split("- ")
         if (parts.size>1)
           status = parts[0].strip rescue nil
           team_name = parts[1].strip rescue nil
