@@ -9,12 +9,16 @@ base_sleep = 0
 sleep_increment = 3
 retries = 4
 
+#http://www.nfl.com/teams/newengland%20patriots/schedule?team=NE&season=2012&seasonType=REG
+
 #http://www.nfl.com/liveupdate/game-center/2013090500/2013090500_gtd.json
 #http://www.nfl.com/scores/2013/REG1
 
 base_url = "http://www.nfl.com"
 
-nfl_team_standings = CSV.open("csv/nfl_team_standings.csv","w",{:col_sep => "\t"})
+nfl_team_standings = CSV.open("csv/nfl_team_standings.csv","r",{:col_sep => "\t", :headers => TRUE})
+
+nfl_team_schedules = CSV.open("csv/nfl_team_standings.csv","w",{:col_sep => "\t"})
 
 # Header for team standings file
 
