@@ -28,8 +28,7 @@ team_standings_url = "http://www.nfl.com/standings?category=div"
 
 team_standings_xpath = '//*[@class="data-table1"]/tbody/tr'
 
-#(2012..2013).each do |year|
-(1920..2013).each do |year|
+(1920..2014).each do |year|
 
   sleep_time = base_sleep
   url = team_standings_url+"&season=#{year}-REG&split=Overall"
