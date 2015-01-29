@@ -26,7 +26,8 @@ nfl_team_schedules << ["season", "team_id", "week", "date", "away_team_id", "awa
 
 team_schedules_url = "http://www.nfl.com/teams/"
 
-team_schedules_xpath = '//*[@id="team-stats-wrapper"]/table[3]/tr[position()>2]'
+#team_schedules_xpath = '//*[@id="team-stats-wrapper"]/table[3]/tr[position()>2]'
+team_schedules_xpath = '//table[@class="data-table1"]/tr[position()>2]'
 
 nfl_team_standings.each do |team_season|
 

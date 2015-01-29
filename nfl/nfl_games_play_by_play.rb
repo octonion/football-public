@@ -34,6 +34,7 @@ games.uniq!
 
 team_game_base_url = "http://www.nfl.com/liveupdate/game-center/"
 
+games_found = 0
 games.each do |game|
 
   year = game[0]
@@ -73,5 +74,7 @@ games.each do |game|
   json_file.close
 
   sleep_time = base_sleep
+  games_found += 1
 
 end
+print "games found = #{games_found}\n"
