@@ -1,7 +1,7 @@
 import numpy as np
 from qpsolvers import solve_qp
 
-trades = np.loadtxt(open("matrix_qp.csv", "rb"), skiprows=0, dtype=np.dtype('Float64'))
+trades = np.loadtxt(open("matrix_qp.csv", "rb"), skiprows=0, dtype=np.float64)
 trades = trades.reshape(329,329)
 
 P = np.dot(trades.T, trades)
