@@ -266,7 +266,7 @@ try:
         if objective_value is not None:
              print(f"Optimal Objective Function Value: {objective_value:.4f}")
 
-        print("\nPick Values:")
+        print("\nPick Values (sample shown below, full results in CSV):")
         output_lines = []
         for i in range(N):
             # Handle potential floating point inaccuracies near zero
@@ -276,14 +276,16 @@ try:
         # Print in columns for better readability if many picks
         num_columns = 3
         col_width = 20 # Adjust as needed
-        num_rows = (N + num_columns - 1) // num_columns
-        for r in range(num_rows):
+        rows_to_print = min(15, (N + num_columns -1) // num_columns) # Print limited rows to console
+        for r in range(rows_to_print):
             line = ""
             for c in range(num_columns):
-                idx = r + c * num_rows
+                idx = r + c * ((N + num_columns -1) // num_columns) # Calculate index properly for columns
                 if idx < N:
                     line += output_lines[idx].ljust(col_width)
             print(line)
+        if N > rows_to_print * num_columns:
+            print("  ...")
 
 
         # Verify constraints (optional)
@@ -306,9 +308,31 @@ try:
             non_negative = all(optimal_pick_values[i] >= -1e-6 for i in range(N))
         print(f"  Non-negativity (pick_i >= 0): {non_negative}")
 
+        # --- Save Results to CSV --- START ---
+        output_filename = 'pick_table_cvxopt.csv'
+        print(f"\nSaving results to {output_filename}...")
+        try:
+            with open(output_filename, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.writer(csvfile)
+                # Write header
+                writer.writerow(['Pick', 'Value'])
+                # Write data rows
+                for i in range(N):
+                    # Consistent handling of near-zero values
+                    val = optimal_pick_values[i] if optimal_pick_values[i] > 1e-7 else 0.0
+                    # Write pick number (1 to N) and formatted value
+                    writer.writerow([i + 1, f"{val:.4f}"])
+            print(f"Successfully saved results to {os.path.abspath(output_filename)}")
+        except IOError as e:
+            print(f"Error: Could not write to file {output_filename}. {e}")
+        except Exception as e:
+            print(f"An unexpected error occurred while saving CSV: {e}")
+        # --- Save Results to CSV --- END ---
+
+
     else:
         print(f"\nSolver finished with status: {solution.get('status', 'N/A')}") # Use .get for safety
-        print("Could not find the optimal solution.")
+        print("Could not find the optimal solution. Results not saved.")
         if solution.get('status') == 'unknown':
              print("  This might be due to numerical issues. Consider adjusting solver options (e.g., 'feastol', 'abstol', 'reltol') or checking data quality.")
         elif solution.get('status') == 'primal infeasible':
@@ -324,12 +348,16 @@ except ValueError as e:
     print("  - Linear dependence in equality constraints (A matrix).")
     print("  - The objective matrix P not being positive semidefinite.")
     print("  - General numerical instability or infeasibility.")
+    print("Results not saved.")
 except TypeError as e:
      print(f"\nTypeError during optimization: {e}")
      print("This often indicates incorrect matrix types or dimensions passed to the solver. Check matrix construction.")
+     print("Results not saved.")
 except ArithmeticError as e:
      print(f"\nArithmeticError during optimization: {e}")
      print("This might indicate numerical issues like division by zero or overflow within the solver.")
+     print("Results not saved.")
 except Exception as e:
     # Catch any other unexpected errors during solving
     print(f"\nAn unexpected error occurred during optimization: {type(e).__name__}: {e}")
+    print("Results not saved.")
