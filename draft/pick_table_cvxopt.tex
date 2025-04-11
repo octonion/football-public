@@ -1,0 +1,115 @@
+\documentclass{article}
+\usepackage{amsmath} % For better math equations
+\usepackage{geometry} % For adjusting margins
+\usepackage{hyperref} % For clickable links (optional)
+\usepackage[utf8]{inputenc} % Handle UTF-8 characters
+
+\geometry{a4paper, margin=1in} % Set page size and margins
+
+\title{NFL Draft Pick Valuation Model}
+\author{Christopher D. Long and Gemini}
+\date{April 10, 2025} % Use current date or specific date
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+The goal of this model is to estimate the relative value of National Football League (NFL) draft picks. Determining these values is crucial for teams when evaluating potential trades. The model is based on analyzing historical trades that involved only draft picks, operating under the assumption that teams, at the time of the trade, perceive the exchange of picks to be roughly equal in value. By analyzing many such trades, we can infer a consistent value curve across all picks.
+
+\section{Model Formulation}
+
+We define a set of variables and constraints to capture the value relationships between picks.
+
+\subsection{Variables}
+Let $v_i$ represent the estimated value of the $i$-th overall draft pick. The index $i$ ranges from 1 up to $N$, where $N$ is the highest pick number observed in the historical trade dataset. Our goal is to find the values $v_1, v_2, \dots, v_N$.
+
+\subsection{Objective Function}
+The core idea is to minimize the difference in total value between the picks exchanged in each trade. For a single trade $t$, let $P_{1,t}$ be the set of pick numbers traded by one team, and $P_{2,t}$ be the set of pick numbers received by that team. The perceived difference in value for this trade is:
+\[
+\Delta_t = \left( \sum_{p \in P_{1,t}} v_p \right) - \left( \sum_{p \in P_{2,t}} v_p \right)
+\]
+We want this difference $\Delta_t$ to be as close to zero as possible for all trades in our dataset $T$. We achieve this by minimizing the sum of the squares of these differences across all trades:
+\[
+\text{Minimize} \quad Z = \sum_{t \in T} (\Delta_t)^2 = \sum_{t \in T} \left[ \left( \sum_{p \in P_{1,t}} v_p \right) - \left( \sum_{p \in P_{2,t}} v_p \right) \right]^2
+\]
+Using the sum of squares penalizes larger discrepancies more heavily and results in a quadratic objective function, which is well-suited for standard optimization techniques.
+
+\subsection{Constraints}
+To ensure the resulting pick values are realistic and follow expected patterns, we impose several constraints:
+
+\begin{enumerate}
+    \item \textbf{Anchor Value:} We fix the value of the first overall pick to a specific number, typically based on historical analysis or established charts (like the widely cited "Jimmy Johnson" chart). This sets the scale for all other pick values.
+    \[
+    v_1 = 3000
+    \]
+
+    \item \textbf{Non-negativity:} The value of any draft pick cannot be negative.
+    \[
+    v_i \ge 0 \quad \text{for all } i = 1, \dots, N
+    \]
+
+    \item \textbf{Monotonicity (Non-increasing):} Higher draft picks (lower $i$) are generally considered more valuable than lower draft picks (higher $i$). We enforce that a pick's value is greater than or equal to the value of the next pick.
+    \[
+    v_i \ge v_{i+1} \quad \text{for all } i = 1, \dots, N-1
+    \]
+
+    \item \textbf{Convexity:} The drop-off in value between consecutive picks is expected to decrease (or stay the same) as the pick number gets higher. This reflects a principle of diminishing marginal value – the difference in value between pick 5 and pick 6 is expected to be greater than or equal to the difference between pick 55 and pick 56. Mathematically:
+    \[
+    (v_i - v_{i+1}) \ge (v_{i+1} - v_{i+2}) \quad \text{for all } i = 1, \dots, N-2
+    \]
+    This inequality can be rewritten as:
+    \[
+    v_i - 2v_{i+1} + v_{i+2} \ge 0
+    \]
+\end{enumerate}
+
+\section{Example}
+
+Let's consider a very small dataset with only two trades and assume the highest pick involved determines $N$.
+
+\textbf{Sample Data:}
+\begin{verbatim}
+year,picks1,picks2
+1992,4,6/28
+1992,17/120,19/104
+\end{verbatim}
+Here, the highest pick number is 120, so $N=120$.
+
+\textbf{Objective Function Contribution:}
+Based on these two trades, the objective function $Z$ to minimize would include these terms:
+\[
+Z = \dots + \left( (v_4) - (v_6 + v_{28}) \right)^2 + \left( (v_{17} + v_{120}) - (v_{19} + v_{104}) \right)^2 + \dots
+\]
+(Note: A real analysis would include many more terms from other trades).
+
+\textbf{Example Constraints (for $N=120$):}
+\begin{itemize}
+    \item Anchor: $v_1 = 3000$
+    \item Non-negativity: $v_1 \ge 0, v_2 \ge 0, \dots, v_{120} \ge 0$
+    \item Monotonicity: $v_1 \ge v_2, v_2 \ge v_3, \dots, v_{119} \ge v_{120}$
+    \item Convexity: $v_1 - 2v_2 + v_3 \ge 0, v_2 - 2v_3 + v_4 \ge 0, \dots, v_{118} - 2v_{119} + v_{120} \ge 0$
+\end{itemize}
+
+\section{Solving the Model with CVXOPT}
+
+The optimization problem we formulated – minimizing a quadratic objective function subject to linear equality and inequality constraints – is known as a \textbf{Quadratic Program (QP)}.
+
+To solve this QP, we use \textbf{CVXOPT}, which is a free software package for convex optimization, built for the Python programming language (\url{https://cvxopt.org/}).
+
+\textbf{Why CVXOPT?} We use CVXOPT because it provides efficient, reliable solvers specifically designed for convex optimization problems, including QPs. Our Python script performs the following steps:
+\begin{enumerate}
+    \item Parses the trade data.
+    \item Constructs the objective function's quadratic part (matrix $P$) and linear part (vector $q$). In our case, $q$ is zero.
+    \item Constructs the matrices for the inequality constraints ($G$ and $h$ such that $Gx \le h$) and equality constraints ($A$ and $b$ such that $Ax = b$), where $x$ is the vector of our variables $(v_1, \dots, v_N)$.
+    \item Passes these matrices ($P, q, G, h, A, b$) to the CVXOPT QP solver.
+    \item Retrieves the solution vector $x$, which contains the optimized pick values $v_1, \dots, v_N$.
+\end{enumerate}
+CVXOPT handles the complex numerical methods required to find the optimal solution that satisfies all constraints while minimizing the objective function.
+
+\section{Conclusion}
+
+This model provides a systematic approach to estimating NFL draft pick values based on historical trade data. By formulating the problem as a Quadratic Program with constraints reflecting realistic value patterns (monotonicity, convexity), and utilizing solvers like CVXOPT, we can generate a data-driven draft value chart useful for trade analysis.
+
+\end{document}
