@@ -212,7 +212,7 @@ try:
     #problem.solve(solver=cp.ECOS, verbose=True)
     #problem.solve(solver=cp.OSQP, verbose=True, max_iter=100000)
     #problem.solve(solver=cp.COPT, verbose=True)
-    #problem.solve(solver=cp.SCS, verbose=True)
+    #problem.solve(solver=cp.SCS, verbose=True, max_iters=200000)
     #problem.solve(verbose=False)
 except cp.error.SolverError as e:
      print(f"CVXPY Solver Error: {e}")
