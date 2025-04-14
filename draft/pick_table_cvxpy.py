@@ -29,7 +29,7 @@ try:
 except FileNotFoundError:
     print(f"Error: File not found at '{os.path.abspath(data_file_path)}'.")
     print("Please ensure the 'data' directory exists in the same directory as the script,")
-    print("and the 'draft_picks.csv' file is inside the 'data' directory.")
+    print("and the 'nfl_picks.csv' file is inside the 'data' directory.")
     # --- Fallback to sample data for demonstration if file not found ---
     # print("Using internal sample data for demonstration.")
     # sample_data = """year,picks1,picks2
