@@ -209,6 +209,7 @@ start_time = time.time()
 # Letting CVXPY choose is usually fine. Add 'verbose=True' for detailed solver output.
 try:
     problem.solve(solver=cp.CLARABEL, verbose=True)
+    #problem.solve(solver=cp.OSQP, verbose=True, max_iter=100000)
     #problem.solve(solver=cp.COPT, verbose=True)
     #problem.solve(solver=cp.SCS, verbose=True)
     #problem.solve(verbose=False)
