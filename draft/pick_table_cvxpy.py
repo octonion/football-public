@@ -208,7 +208,8 @@ start_time = time.time()
 # Examples: OSQP, SCS, CLARABEL, ECOS (might struggle with QP), GUROBI (if installed+license)
 # Letting CVXPY choose is usually fine. Add 'verbose=True' for detailed solver output.
 try:
-    problem.solve(solver=cp.CLARABEL, verbose=True)
+    problem.solve(solver=cp.PIQP, verbose=True)
+    #problem.solve(solver=cp.CLARABEL, verbose=True)
     #problem.solve(solver=cp.CPLEX, verbose=True)
     #problem.solve(solver=cp.MOSEK, verbose=True)
     #problem.solve(solver=cp.ECOS, verbose=True)
